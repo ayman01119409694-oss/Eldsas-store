@@ -1,0 +1,21 @@
+{
+  "name": "الدشاش استور — شحن SuperLive",
+  "short_name": "الدشاش استور",
+  "description": "متجر الدشاش استور لشحن كوينز SuperLive وإدارة المحفظة والطلبات",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0e12",
+  "theme_color": "#0d0e12",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

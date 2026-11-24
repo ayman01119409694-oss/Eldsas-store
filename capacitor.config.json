@@ -1,0 +1,8 @@
+{
+  "appId": "com.eldashash.store",
+  "appName": "الدشاش استور",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

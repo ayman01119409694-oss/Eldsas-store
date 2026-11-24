@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d0e12">
+<title>الدشاش استور — منصة الشحن الرقمي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0e12;
+  --surface:#14161c;
+  --surface-2:#1b1e27;
+  --surface-3:#222632;
+  --ink:#f4f2ed;
+  --ink-soft:#c8c3b8;
+  --muted:#8b8982;
+  --brass:#d4a359;
+  --brass-bright:#e8be7a;
+  --brass-soft:rgba(212,163,89,.13);
+  --emerald:#28a774;
+  --emerald-soft:rgba(40,167,116,.14);
+  --line:rgba(244,242,237,.09);
+  --line-strong:rgba(212,163,89,.36);
+  --danger:#d9534f;
+  --radius-lg:20px;
+  --radius-md:14px;
+  --radius-sm:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:'Cairo',Tahoma,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+button:disabled{opacity:.45;cursor:not-allowed}
+.wrap{width:min(1220px,calc(100% - 32px));margin:auto}
+
+/* Subtle architectural noise & warm top vignette */
+body::before{
+  content:"";
+  position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:radial-gradient(900px 360px at 50% -60px, rgba(212,163,89,.08), transparent 70%);
+}
+
+/* Toast */
+.toast-box{position:fixed;bottom:22px;left:22px;z-index:130;display:flex;flex-direction:column;gap:8px;max-width:350px}
+.toast{
+  background:var(--surface-2);
+  border:1px solid var(--line-strong);
+  color:var(--ink);
+  padding:11px 16px;
+  border-radius:var(--radius-sm);
+  font-size:13px;font-weight:700;
+  box-shadow:0 14px 32px rgba(0,0,0,.55);
+}
+
+/* Buttons */
+.btn{
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  color:var(--ink);
+  padding:10px 16px;
+  border-radius:var(--radius-sm);
+  font-weight:700;
+  font-size:13.5px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  text-decoration:none;
+}
+.btn:hover:not(:disabled){border-color:var(--line-strong);background:var(--surface-3)}
+.btn.brass{
+  background:var(--brass);
+  color:#11100d;
+  border-color:var(--brass);
+  font-weight:800;
+}
+.btn.brass:hover:not(:disabled){background:var(--brass-bright);border-color:var(--brass-bright)}
+.btn.ghost-brass{
+  background:var(--brass-soft);
+  color:var(--brass-bright);
+  border-color:rgba(212,163,89,.28);
+}
+.btn.ghost-brass:hover:not(:disabled){border-color:var(--brass)}
+.btn.danger-soft{
+  background:rgba(217,83,79,.1);
+  color:#f29b98;
+  border-color:rgba(217,83,79,.25);
+}
+.btn.sm{padding:7px 12px;font-size:12.5px;border-radius:9px}
+.icon-btn{width:38px;height:38px;padding:0;border-radius:10px;font-size:17px;position:relative}
+
+.muted{color:var(--muted);font-size:13px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
+.field input,.field textarea,.field select{
+  width:100%;
+  padding:11px 14px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--line);
+  background:var(--bg);
+  color:var(--ink);
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  outline:none;border-color:var(--brass);
+}
+
+.alert{padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;line-height:1.65;margin-top:12px;font-weight:600}
+.alert.err{background:rgba(217,83,79,.12);border:1px solid rgba(217,83,79,.35);color:#f3a6a3}
+.alert.ok{background:var(--emerald-soft);border:1px solid rgba(40,167,116,.35);color:#78e0b5}
+
+/* ================= AUTH SCREEN ================= */
+#authScreen{min-height:100vh;display:grid;grid-template-columns:1.08fr .92fr}
+.auth-editorial{
+  padding:48px 52px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:var(--surface);
+  border-left:1px solid var(--line);
+}
+.brand-mark{display:inline-flex;align-items:center;gap:12px;font-size:20px;font-weight:900;letter-spacing:-.2px;cursor:pointer}
+.brand-monogram{
+  width:36px;height:36px;border-radius:10px;
+  border:1px solid var(--line-strong);
+  background:var(--brass-soft);
+  color:var(--brass-bright);
+  display:grid;place-items:center;
+  font-weight:900;font-size:17px;
+}
+.auth-copy{max-width:500px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:800;letter-spacing:.4px;
+  color:var(--brass-bright);
+  margin-bottom:14px;
+}
+.eyebrow::before{content:"";width:18px;height:1px;background:var(--brass)}
+.auth-copy h1{font-size:clamp(30px,3.6vw,44px);line-height:1.2;margin:0 0 14px;font-weight:900}
+.auth-copy h1 span{color:var(--brass-bright)}
+.auth-copy p{color:var(--muted);line-height:1.85;margin:0 0 26px;font-size:14.5px}
+.auth-pillars{display:grid;gap:10px}
+.pillar-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;border-radius:var(--radius-md);
+  border:1px solid var(--line);background:var(--bg);
+  font-size:13.5px;font-weight:600;color:var(--ink-soft);
+}
+.pillar-row span:last-child{color:var(--brass-bright);font-weight:800;font-size:12px}
+
+.auth-form-col{display:flex;align-items:center;justify-content:center;padding:28px 18px}
+.auth-box{
+  width:min(430px,100%);
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:28px 24px;
+}
+.seg-tabs{
+  display:grid;grid-template-columns:1fr 1fr;gap:4px;
+  background:var(--bg);padding:4px;border-radius:11px;
+  border:1px solid var(--line);margin-bottom:20px;
+}
+.seg-btn{border:0;background:transparent;color:var(--muted);padding:9px;border-radius:8px;font-weight:800;font-size:13.5px}
+.seg-btn.active{background:var(--surface-2);color:var(--ink);border:1px solid var(--line-strong)}
+
+.otp-email-chip{
+  display:inline-block;background:var(--brass-soft);border:1px solid var(--line-strong);
+  color:var(--brass-bright);padding:5px 12px;border-radius:8px;
+  font-size:13px;font-weight:800;direction:ltr;margin-bottom:12px;
+}
+
+/* ================= TOP HEADER & TABS ================= */
+header{
+  display:none;position:sticky;top:0;z-index:35;
+  background:rgba(13,14,18,.88);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+header.show{display:block}
+.nav-row{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.nav-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.subnav{border-top:1px solid var(--line);background:var(--surface)}
+.subnav-inner{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:8px 0}
+.tab-link{
+  border:1px solid transparent;background:transparent;color:var(--muted);
+  padding:8px 15px;border-radius:9px;font-weight:800;font-size:13px;
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+}
+.tab-link:hover{color:var(--ink);background:var(--surface-2)}
+.tab-link.active{color:var(--ink);background:var(--surface-2);border-color:var(--line-strong)}
+.pill-tag{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px}
+.pill-tag.live{background:var(--emerald-soft);color:#6ee7b7}
+.pill-tag.soon{background:var(--brass-soft);color:var(--brass-bright)}
+
+/* ================= STOREFRONT CONTENT ================= */
+#shop{display:none;padding:28px 0 64px}
+#shop.show{display:block}
+
+.hero-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:32px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  margin-bottom:28px;
+}
+.hero-card h1,.hero-card h2{margin:0 0 10px;font-size:clamp(25px,3.4vw,36px);font-weight:900;line-height:1.22}
+.hero-card h1 span,.hero-card h2 span{color:var(--brass-bright)}
+.hero-card p{margin:0;color:var(--muted);line-height:1.8;max-width:620px;font-size:14.5px}
+.hero-meta{
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:18px 22px;min-width:190px;text-align:center;
+}
+.hero-meta .big{font-size:22px;font-weight:900;color:var(--brass-bright)}
+
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 14px}
+.sec-head h3{margin:0;font-size:18px;font-weight:900}
+
+/* Programs Grid */
+.apps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.app-tile{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:22px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:18px;
+}
+.app-tile.ready{border-color:rgba(212,163,89,.28)}
+.app-tile:hover{border-color:var(--line-strong)}
+.app-tile-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.app-badge-icon{
+  width:46px;height:46px;border-radius:12px;
+  background:var(--bg);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:22px;
+}
+.status-txt{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:99px}
+.status-txt.ready{background:var(--emerald-soft);color:#6ee7b7}
+.status-txt.soon{background:var(--brass-soft);color:var(--brass-bright)}
+.app-tile h4{margin:0 0 6px;font-size:18px;font-weight:800}
+.app-tile p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+
+/* Steps */
+.steps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.step-item{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:15px 16px;
+  display:flex;align-items:center;gap:12px;
+}
+.step-idx{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--brass-soft);color:var(--brass-bright);
+  font-weight:900;font-size:13.5px;display:grid;place-items:center;flex-shrink:0;
+}
+
+/* Payment Grid */
+.pay-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px}
+.pay-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:18px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.pay-num{font-size:20px;font-weight:900;direction:ltr;color:var(--brass-bright);letter-spacing:.8px;margin-top:3px}
+
+/* Filter & Search */
+.filter-bar{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:10px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.tier-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill-btn{border:1px solid transparent;background:transparent;color:var(--muted);padding:7px 14px;border-radius:9px;font-weight:800;font-size:12.5px}
+.pill-btn:hover{color:var(--ink);background:var(--surface-2)}
+.pill-btn.active{background:var(--brass);color:#11100d}
+.search-box{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:8px 13px;border-radius:9px;min-width:230px}
+.search-box:focus{outline:none;border-color:var(--brass)}
+
+/* Packages */
+.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.pkg-item{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:18px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:15px;
+}
+.pkg-item:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+.pkg-item.featured-tier{border-color:rgba(212,163,89,.32)}
+.pkg-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pkg-code{font-size:11px;font-weight:800;letter-spacing:.8px;color:var(--muted)}
+.pkg-tier{font-size:11px;font-weight:800;color:var(--brass-bright);background:var(--brass-soft);padding:2px 9px;border-radius:99px}
+.pkg-amount{font-size:22px;font-weight:900;color:var(--ink);margin:8px 0 2px}
+.pkg-price-line{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 11px;border-radius:9px;
+  background:var(--bg);border:1px solid var(--line);margin-bottom:10px;
+}
+.pkg-price-val{font-size:17px;font-weight:900;color:var(--brass-bright)}
+
+/* Wallet & Checkout helpers */
+.wallet-banner{
+  background:var(--bg);border:1px solid var(--line-strong);
+  border-radius:var(--radius-md);padding:18px;margin-bottom:16px;
+}
+.wallet-bal{font-size:28px;font-weight:900;color:var(--brass-bright);margin:4px 0}
+.choice-row{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;margin-bottom:8px;
+  background:var(--bg);font-size:13px;font-weight:700;cursor:pointer;
+}
+.choice-row input{width:auto;margin:0;accent-color:var(--brass)}
+
+/* Modals */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(6,7,10,.78);backdrop-filter:blur(6px);
+  z-index:70;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto;
+}
+.modal-bg.open{display:flex}
+.modal-box{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);width:min(540px,100%);
+  padding:22px;max-height:90vh;overflow:auto;
+}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:15px;border-bottom:1px solid var(--line)}
+.modal-hdr h3{margin:0;font-size:18px;font-weight:900}
+.x-btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);width:32px;height:32px;border-radius:8px;font-weight:800}
+
+.list-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list-row:last-child{border-bottom:0}
+.st-badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11.5px;font-weight:800}
+.st-pending{background:var(--brass-soft);color:var(--brass-bright)}
+.st-paid{background:rgba(56,189,248,.14);color:#7dd3fc}
+.st-shipped{background:var(--emerald-soft);color:#6ee7b7}
+.st-rejected{background:rgba(217,83,79,.14);color:#f3a6a3}
+.proof-thumb{display:none;max-width:100%;max-height:200px;border-radius:10px;margin-top:10px;border:1px solid var(--line)}
+
+footer{display:none;border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:13px;background:var(--surface)}
+footer.show{display:block}
+.foot-inner{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+
+@media(max-width:980px){
+  #authScreen{grid-template-columns:1fr}
+  .auth-editorial{display:none}
+  .apps-grid,.steps-row{grid-template-columns:1fr}
+  .pkg-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:640px){
+  .pkg-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pkg-item{padding:14px}
+  .pkg-amount{font-size:19px}
+  .pay-row{grid-template-columns:1fr}
+  .hero-card{flex-direction:column;align-items:flex-start;padding:22px}
+  .hero-meta{width:100%}
+}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0e12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الدشاش استور">
+<link rel="apple-touch-icon" href="icon.svg">
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</head>
+<body>
+
+<div class="toast-box" id="toastBox"></div>
+
+<!-- ================= AUTH ================= -->
+<section id="authScreen">
+  <div class="auth-editorial">
+    <div class="brand-mark"><span class="brand-monogram">د</span> الدشاش استور</div>
+    <div class="auth-copy">
+      <div class="eyebrow">وكالة الشحن الرقمي</div>
+      <h1>شحن مباشر وموثوق<br><span>لبرامجك وحساباتك</span></h1>
+      <p>سجّل دخولك بالبريد الإلكتروني وكود التحقق المكوّن من 6 أرقام لإدارة محفظتك، متابعة طلباتك، وشحن باقات SuperLive وغيرها من الأقسام.</p>
+      <div class="auth-pillars">
+        <div class="pillar-row"><span>شحن SuperLive بالـ ID</span><span>متاح الآن</span></div>
+        <div class="pillar-row"><span>محفظة رصيد وطلبات إيداع</span><span>مفعّلة</span></div>
+        <div class="pillar-row"><span>تحقق بالبريد الإلكتروني (OTP)</span><span>6 أرقام</span></div>
+      </div>
+    </div>
+    <div class="muted">الدشاش استور — جميع الحقوق محفوظة</div>
+  </div>
+
+  <div class="auth-form-col">
+    <div class="auth-box">
+      <div style="margin-bottom:16px">
+        <div style="font-size:20px;font-weight:900">تسجيل الدخول للمتجر</div>
+        <div class="muted">أدخل بريدك الإلكتروني للمتابعة أو إنشاء حساب</div>
+      </div>
+
+      <div class="seg-tabs" id="modeSwitch">
+        <button type="button" class="seg-btn active" id="btnTabLogin" onclick="switchAuthMode('login')">دخول</button>
+        <button type="button" class="seg-btn" id="btnTabSignup" onclick="switchAuthMode('signup')">حساب جديد</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="lEmail">البريد الإلكتروني</label>
+          <input id="lEmail" type="email" required autocomplete="email" dir="ltr" placeholder="name@example.com">
+        </div>
+        <div class="field">
+          <label for="lPass">كلمة المرور</label>
+          <input id="lPass" type="password" required autocomplete="current-password" dir="ltr" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn brass" id="lSubmit" style="width:100%;padding:11px">دخول بكلمة المرور</button>
+        <button type="button" class="btn" id="btnOtpLogin" style="width:100%;padding:10px;margin-top:8px" onclick="startEmailOtpLogin()">دخول سريع بكود OTP (6 أرقام)</button>
+      </form>
+
+      <form id="signupForm" style="display:none">
+        <div class="field">
+          <label for="sName">الاسم بالكامل</label>
+          <input id="sName" required autocomplete="name" placeholder="الاسم">
+        </div>
+        <div class="field">
+          <label for="sEmail">البريد الإلكتروني</label>
+          <input id="sEmail" type="email" required autocomplete="email" dir="ltr" placeholder="name@example.com">
+        </div>
+        <div class="field">
+          <label for="sPass">كلمة المرور</label>
+          <input id="sPass" type="password" minlength="6" required autocomplete="new-password" dir="ltr" placeholder="6 أحرف على الأقل">
+        </div>
+        <div class="field">
+          <label for="sPass2">تأكيد كلمة المرور</label>
+          <input id="sPass2" type="password" minlength="6" required autocomplete="new-password" dir="ltr" placeholder="أعد كتابة كلمة المرور">
+        </div>
+        <button type="submit" class="btn brass" id="sSubmit" style="width:100%;padding:11px">إنشاء الحساب وإرسال الرمز</button>
+      </form>
+
+      <div id="otpSection" style="display:none">
+        <div id="otpTargetEmail" class="otp-email-chip"></div>
+        <div class="field">
+          <label for="otpInput">رمز التحقق (6 أرقام)</label>
+          <input id="otpInput" inputmode="numeric" maxlength="6" pattern="\d{6}" autocomplete="one-time-code" dir="ltr" style="text-align:center;font-size:23px;font-weight:900;letter-spacing:8px;font-family:monospace" placeholder="------">
+        </div>
+        <button type="button" class="btn brass" id="btnConfirmOtp" style="width:100%;padding:11px" onclick="confirmOtp()">تأكيد الرمز</button>
+        <button type="button" class="btn" id="btnResendOtp" style="width:100%;padding:10px;margin-top:8px" onclick="resendOtp()">إعادة إرسال الرمز</button>
+        <button type="button" class="btn" style="width:100%;padding:10px;margin-top:8px" onclick="switchAuthMode('login')">رجوع</button>
+      </div>
+
+      <div id="authMsg" class="alert err" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HEADER ================= -->
+<header id="topBar">
+  <div class="wrap nav-row">
+    <div class="brand-mark" onclick="switchSection('home')"><span class="brand-monogram">د</span> الدشاش استور</div>
+    <div class="nav-right">
+      <button type="button" class="btn icon-btn" title="طلباتي" aria-label="طلباتي" onclick="openOrdersDrawer()">📦</button>
+      <button type="button" class="btn ghost-brass icon-btn" title="محفظتك في المتجر" aria-label="محفظتك في المتجر" onclick="openWalletModal()">👛</button>
+      <button type="button" class="btn brass sm" style="padding:8px 13px" title="الباقة المختارة" aria-label="الباقة المختارة" onclick="openCheckoutModal()">💎 <span id="pickedLabel">لم تُختر</span></button>
+      <button type="button" class="btn danger-soft icon-btn" title="خروج" aria-label="خروج" onclick="logoutSession()">🚪</button>
+    </div>
+  </div>
+  <div class="subnav">
+    <div class="wrap subnav-inner">
+      <button type="button" class="tab-link active" data-tab="home" onclick="switchSection('home')">🏠 الرئيسية</button>
+      <button type="button" class="tab-link" data-tab="superlive" onclick="switchSection('superlive')">💎 شحن SuperLive <span class="pill-tag live">متاح</span></button>
+      <button type="button" class="tab-link" data-tab="upcoming" onclick="switchSection('upcoming')">✦ برامج جديدة <span class="pill-tag soon">قريباً</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= MAIN STOREFRONT ================= -->
+<main id="shop" class="wrap">
+
+  <!-- HOME / PROGRAMS HUB -->
+  <div id="view-home">
+    <div class="hero-card">
+      <div>
+        <div class="eyebrow">المتجر الرئيسي</div>
+        <h1>اختر القسم <span>المراد شحنه</span></h1>
+        <p>تصفح البرامج المتاحة داخل المتجر؛ قسم <strong>SuperLive</strong> جاهز للشحن الفوري، ومع التوسعات القادمة ستظهر البرامج الجديدة هنا مباشرة.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="muted" style="font-weight:700">الدفع المعتمد</div>
+        <div class="big" style="margin:5px 0">InstaPay · Cash</div>
+        <div class="muted">أو من رصيد المحفظة</div>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <h3>برامج المتجر</h3>
+      <span class="muted">اختر قسماً للبدء</span>
+    </div>
+    <div class="apps-grid" id="appsHubGrid"></div>
+
+    <div class="sec-head">
+      <h3>حسابات التحويل</h3>
+      <span class="muted">الدفع المسبق</span>
+    </div>
+    <div class="pay-row" id="homePayChannelsGrid"></div>
+  </div>
+
+  <!-- SUPERLIVE TAB -->
+  <div id="view-superlive" style="display:none">
+    <div style="margin-bottom:14px">
+      <button type="button" class="btn sm" onclick="switchSection('home')">← جميع البرامج</button>
+    </div>
+
+    <div class="hero-card">
+      <div>
+        <div class="eyebrow">SuperLive</div>
+        <h2>باقات شحن <span>SuperLive</span></h2>
+        <p>اختر الباقة المناسبة، ادفع عبر التحويل المباشر أو من رصيد محفظتك، وأدخل SuperLive ID لإتمام الطلب.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="muted" style="font-weight:700">العملة</div>
+        <div class="big" style="margin:5px 0">COINS</div>
+        <div class="muted">شحن مباشر</div>
+      </div>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-idx">01</div>
+        <div><div style="font-weight:800;font-size:13.5px">حوّل أو استخدم محفظتك</div><div class="muted">إنستاباي، فودافون كاش، أو رصيد المحفظة</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-idx">02</div>
+        <div><div style="font-weight:800;font-size:13.5px">اختر الباقة والـ ID</div><div class="muted">تأكيد بيانات الحساب بدقة</div></div>
+      </div>
+      <div class="step-item">
+        <div class="step-idx">03</div>
+        <div><div style="font-weight:800;font-size:13.5px">تابع حالة الطلب</div><div class="muted">من سجل طلباتك في أي وقت</div></div>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <h3>أرقام التحويل</h3>
+      <span class="muted">نسخ فوري</span>
+    </div>
+    <div class="pay-row" id="payChannelsGrid"></div>
+
+    <div class="sec-head">
+      <h3>الباقات</h3>
+      <span class="muted" id="pkgSourceHint">الأسعار بالجنيه المصري</span>
+    </div>
+    <div class="filter-bar">
+      <div class="tier-pills">
+        <button type="button" class="pill-btn active" onclick="filterTier('all',this)">الكل</button>
+        <button type="button" class="pill-btn" onclick="filterTier('offer1',this)">العرض الأول</button>
+        <button type="button" class="pill-btn" onclick="filterTier('offer2',this)">العرض الثاني</button>
+        <button type="button" class="pill-btn" onclick="filterTier('offer3',this)">العرض الثالث</button>
+      </div>
+      <input class="search-box" id="pkgSearch" type="search" placeholder="بحث بالكوينز أو السعر..." oninput="renderPkgList()">
+    </div>
+
+    <div class="pkg-grid" id="pkgGrid">
+      <div class="muted" style="grid-column:1/-1;padding:24px;text-align:center">جاري تحميل الباقات...</div>
+    </div>
+  </div>
+
+  <!-- UPCOMING PROGRAMS TAB -->
+  <div id="view-upcoming" style="display:none">
+    <div class="hero-card" style="justify-content:center;text-align:center;padding:44px 24px">
+      <div>
+        <div class="eyebrow" style="justify-content:center">تحديثات قادمة</div>
+        <h2>برامج جديدة قيد الإضافة</h2>
+        <p style="margin:0 auto 18px">نعمل على إضافة أقسام وبرامج جديدة داخل المتجر بنفس آلية الشحن السريع.</p>
+        <button type="button" class="btn brass" onclick="switchSection('superlive')">الانتقال إلى SuperLive</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer id="foot">
+  <div class="wrap foot-inner">
+    <span>الدشاش استور</span>
+    <span>© 2026</span>
+  </div>
+</footer>
+
+<!-- ================= CHECKOUT MODAL ================= -->
+<div class="modal-bg" id="checkoutModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>إتمام طلب الشحن</h3>
+      <button type="button" class="x-btn" onclick="closeModals()">✕</button>
+    </div>
+    <div id="checkoutSummary" style="margin-bottom:14px"></div>
+    <form id="checkoutForm">
+      <div class="field">
+        <label for="cName">الاسم بالكامل</label>
+        <input id="cName" required maxlength="100" placeholder="اسمك">
+      </div>
+      <div class="field">
+        <label for="cPhone">رقم الموبايل</label>
+        <input id="cPhone" required maxlength="30" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
+      </div>
+      <div class="field">
+        <label for="cLiveId">SuperLive ID</label>
+        <input id="cLiveId" required maxlength="60" dir="ltr" placeholder="معرّف الحساب في SuperLive">
+      </div>
+      <div class="field">
+        <label>طريقة الدفع</label>
+        <label class="choice-row">
+          <input type="radio" name="paySource" value="transfer" checked onchange="toggleCheckoutPayMode()">
+          تحويل مباشر + إرفاق إيصال
+        </label>
+        <label class="choice-row">
+          <input type="radio" name="paySource" value="wallet" onchange="toggleCheckoutPayMode()">
+          رصيد المحفظة (<span id="checkoutWalletBal">0.00 ج.م</span>)
+        </label>
+      </div>
+      <div id="transferFieldsGroup">
+        <div class="field">
+          <label>الحساب المحوّل إليه</label>
+          <div id="paymentRadios"></div>
+        </div>
+        <div class="field">
+          <label for="cProof">صورة إثبات الدفع (JPG / PNG / WEBP — حد أقصى 5MB)</label>
+          <input id="cProof" type="file" accept="image/jpeg,image/png,image/webp" required>
+          <img id="cPreview" class="proof-thumb" alt="معاينة الإيصال">
+        </div>
+      </div>
+      <button type="submit" class="btn brass" id="cSubmit" style="width:100%;padding:11px">تأكيد الطلب</button>
+    </form>
+    <div id="checkoutDone"></div>
+  </div>
+</div>
+
+<!-- ================= WALLET MODAL ================= -->
+<div class="modal-bg" id="walletModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>محفظتك في المتجر</h3>
+      <button type="button" class="x-btn" onclick="closeModals()">✕</button>
+    </div>
+
+    <div class="wallet-banner">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div>
+          <div class="muted" style="font-weight:700">الرصيد المتاح</div>
+          <div class="wallet-bal" id="walletBalanceText">0.00 ج.م</div>
+          <div class="muted" id="walletUserEmail" style="direction:ltr;text-align:right"></div>
+        </div>
+        <button type="button" class="btn brass sm" onclick="toggleDepositForm()">+ إيداع رصيد</button>
+      </div>
+    </div>
+
+    <form id="walletDepositForm" style="display:none;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-md);padding:15px;margin-bottom:16px">
+      <div style="font-weight:800;font-size:14.5px;margin-bottom:10px">طلب إضافة رصيد للمحفظة</div>
+      <div class="field">
+        <label for="dAmount">المبلغ (ج.م)</label>
+        <input id="dAmount" type="number" min="1" step="0.01" required placeholder="مثال: 250">
+      </div>
+      <div class="field">
+        <label>وسيلة التحويل</label>
+        <div id="depositPaymentRadios"></div>
+      </div>
+      <div class="field">
+        <label for="dProof">صورة إثبات التحويل (JPG / PNG / WEBP — حد أقصى 5MB)</label>
+        <input id="dProof" type="file" accept="image/jpeg,image/png,image/webp" required>
+      </div>
+      <button type="submit" class="btn brass" id="dSubmit" style="width:100%;padding:10px">إرسال طلب الإيداع</button>
+      <div id="depositMsg"></div>
+    </form>
+
+    <div class="sec-head" style="margin-top:0">
+      <h3 style="font-size:15px">أرقام التحويل</h3>
+      <span class="muted">نسخ</span>
+    </div>
+    <div id="walletChannelsBox" style="margin-bottom:14px"></div>
+
+    <div class="sec-head" style="margin-top:4px">
+      <h3 style="font-size:15px">سجل المحفظة</h3>
+      <span class="muted" id="walletTxCount"></span>
+    </div>
+    <div id="walletHistoryBox" style="margin-bottom:14px">جاري التحميل...</div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn brass" style="flex:1" onclick="closeModals(); switchSection('superlive')">باقات SuperLive</button>
+      <button type="button" class="btn" onclick="closeModals(); openOrdersDrawer()">سجل الطلبات</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MY ORDERS MODAL ================= -->
+<div class="modal-bg" id="myOrdersModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>طلباتي</h3>
+      <button type="button" class="x-btn" onclick="closeModals()">✕</button>
+    </div>
+    <div id="myOrdersList">جاري التحميل...</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://etdegfytfcfwuorexctj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_NP_1OLXEN0_f398DthKnGA_725B_IMf";
+const PROOFS_BUCKET = "payment-proofs";
+
+const DEFAULT_CHANNELS = [
+  { label: "إنستاباي (InstaPay)", number: "01119409694" },
+  { label: "فودافون كاش (Vodafone Cash)", number: "01011496149" }
+];
+
+function getChannels() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("eldashash_channels_v1") || "null");
+    if (Array.isArray(saved) && saved.length) return saved;
+  } catch {}
+  return DEFAULT_CHANNELS;
+}
+
+const STORE_APPS = [
+  {
+    id: "superlive",
+    name: "شحن SuperLive",
+    icon: "💎",
+    status: "ready",
+    badge: "متاح",
+    desc: "باقات شحن كوينز SuperLive بالمعرّف مع خيارات دفع متعددة.",
+    btn: "دخول القسم"
+  },
+  {
+    id: "upcoming",
+    name: "برامج جديدة",
+    icon: "✦",
+    status: "soon",
+    badge: "قريباً",
+    desc: "توسعات جديدة لتطبيقات وخدمات إضافية داخل المتجر.",
+    btn: "قريباً"
+  },
+  {
+    id: "upcoming",
+    name: "بطاقات وأكواد",
+    icon: "◈",
+    status: "soon",
+    badge: "قريباً",
+    desc: "إضافة بطاقات الشحن الرقمية والخدمات الإضافية قريباً.",
+    btn: "قريباً"
+  }
+];
+
+const TIERS = { offer1: "العرض الأول", offer2: "العرض الثاني", offer3: "العرض الثالث" };
+const STATUS_AR = { pending: "قيد المراجعة", paid: "مؤكد", shipped: "تم الشحن", rejected: "مرفوض" };
+const STATUS_CLS = { pending: "st-pending", paid: "st-paid", shipped: "st-shipped", rejected: "st-rejected" };
+
+let sb = (window.supabase && typeof window.supabase.createClient === "function")
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
+let allPackages = [];
+let selectedPkg = null;
+let currentTier = "all";
+let otpEmail = "";
+let otpFlow = "signup";
+let authBusy = false;
+
+const fmt = n => Number(n).toLocaleString("en-US");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+
+function ensureClient() {
+  if (!sb && window.supabase && typeof window.supabase.createClient === "function") {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+  return sb;
+}
+
+function switchSection(sec) {
+  ["home", "superlive", "upcoming"].forEach(k => {
+    const el = document.getElementById("view-" + k);
+    if (el) el.style.display = (k === sec) ? "block" : "none";
+  });
+  document.querySelectorAll(".tab-link").forEach(b => b.classList.toggle("active", b.dataset.tab === sec));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderAppsHub() {
+  document.getElementById("appsHubGrid").innerHTML = STORE_APPS.map(a => {
+    const isReady = a.status === "ready";
+    return `
+      <div class="app-tile ${isReady ? "ready" : ""}">
+        <div>
+          <div class="app-tile-top" style="margin-bottom:14px">
+            <div class="app-badge-icon">${a.icon}</div>
+            <span class="status-txt ${isReady ? "ready" : "soon"}">${esc(a.badge)}</span>
+          </div>
+          <h4>${esc(a.name)}</h4>
+          <p>${esc(a.desc)}</p>
+        </div>
+        <div>
+          ${isReady
+            ? `<button type="button" class="btn brass" style="width:100%" onclick="switchSection('${a.id}')">${esc(a.btn)}</button>`
+            : `<button type="button" class="btn" style="width:100%" onclick="toast('هذا القسم قيد التجهيز وسيتم إضافته قريباً')">${esc(a.btn)}</button>`
+          }
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderPaymentUi() {
+  const channels = getChannels();
+  const cards = channels.map(ch => `
+    <div class="pay-card">
+      <div>
+        <div style="font-weight:700;font-size:13px;color:var(--ink-soft)">${esc(ch.label)}</div>
+        <div class="pay-num">${esc(ch.number)}</div>
+      </div>
+      <button type="button" class="btn ghost-brass sm" onclick="copyNum('${esc(ch.number)}')">نسخ</button>
+    </div>
+  `).join("");
+
+  document.getElementById("payChannelsGrid").innerHTML = cards;
+  document.getElementById("homePayChannelsGrid").innerHTML = cards;
+
+  const radiosHtml = channels.map((ch, i) => `
+    <label class="choice-row">
+      <input type="radio" name="payMethod" value="${esc(ch.label)}" ${i === 0 ? "checked" : ""}>
+      ${esc(ch.label)} — <span dir="ltr">${esc(ch.number)}</span>
+    </label>
+  `).join("");
+  document.getElementById("paymentRadios").innerHTML = radiosHtml;
+
+  const depRadios = document.getElementById("depositPaymentRadios");
+  if (depRadios) {
+    depRadios.innerHTML = channels.map((ch, i) => `
+      <label class="choice-row">
+        <input type="radio" name="depPayMethod" value="${esc(ch.label)}" ${i === 0 ? "checked" : ""}>
+        ${esc(ch.label)} — <span dir="ltr">${esc(ch.number)}</span>
+      </label>
+    `).join("");
+  }
+}
+
+function toast(msg) {
+  const box = document.getElementById("toastBox");
+  const d = document.createElement("div");
+  d.className = "toast";
+  d.textContent = msg;
+  box.appendChild(d);
+  setTimeout(() => d.remove(), 2700);
+}
+
+async function copyNum(val) {
+  try { await navigator.clipboard.writeText(val); }
+  catch {
+    const t = document.createElement("textarea");
+    t.value = val; document.body.appendChild(t); t.select();
+    document.execCommand("copy"); t.remove();
+  }
+  toast("تم النسخ: " + val);
+}
+
+function showMsg(msg, ok = false) {
+  const el = document.getElementById("authMsg");
+  el.style.display = "block";
+  el.className = ok ? "alert ok" : "alert err";
+  el.textContent = msg;
+}
+function hideMsg() { document.getElementById("authMsg").style.display = "none"; }
+
+function switchAuthMode(mode) {
+  hideMsg();
+  document.getElementById("otpSection").style.display = "none";
+  document.getElementById("modeSwitch").style.display = "grid";
+  const login = mode === "login";
+  document.getElementById("btnTabLogin").classList.toggle("active", login);
+  document.getElementById("btnTabSignup").classList.toggle("active", !login);
+  document.getElementById("loginForm").style.display = login ? "block" : "none";
+  document.getElementById("signupForm").style.display = login ? "none" : "block";
+}
+
+function openOtpBox(email, flow, noticeText) {
+  otpEmail = email.trim().toLowerCase();
+  otpFlow = flow;
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("signupForm").style.display = "none";
+  document.getElementById("modeSwitch").style.display = "none";
+  document.getElementById("otpSection").style.display = "block";
+  document.getElementById("otpTargetEmail").textContent = otpEmail;
+  document.getElementById("otpInput").value = "";
+  document.getElementById("otpInput").focus();
+  showMsg(noticeText || "تم إرسال رمز التحقق (6 أرقام) إلى بريدك الإلكتروني.", true);
+}
+
+function showAuthView() {
+  closeModals();
+  document.getElementById("authScreen").style.display = "grid";
+  document.getElementById("topBar").classList.remove("show");
+  document.getElementById("shop").classList.remove("show");
+  document.getElementById("foot").classList.remove("show");
+  switchAuthMode("login");
+}
+
+function openShopView() {
+  closeModals();
+  document.getElementById("authScreen").style.display = "none";
+  document.getElementById("topBar").classList.add("show");
+  document.getElementById("shop").classList.add("show");
+  document.getElementById("foot").classList.add("show");
+}
+
+async function syncSession() {
+  const client = ensureClient();
+  if (!client) { showAuthView(); return; }
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) { showAuthView(); return; }
+  if (session.user.user_metadata?.full_name && !document.getElementById("cName").value) {
+    document.getElementById("cName").value = session.user.user_metadata.full_name;
+  }
+  openShopView();
+}
+
+document.getElementById("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (authBusy) return;
+  hideMsg();
+  const client = ensureClient();
+  if (!client) { showMsg("تعذر تهيئة الاتصال."); return; }
+  authBusy = true;
+  const btn = document.getElementById("lSubmit");
+  btn.disabled = true;
+  try {
+    const email = document.getElementById("lEmail").value.trim().toLowerCase();
+    const { error } = await client.auth.signInWithPassword({ email, password: document.getElementById("lPass").value });
+    if (error) { showMsg(error.message); return; }
+    await syncSession();
+    toast("تم تسجيل الدخول");
+  } catch (err) {
+    showMsg(err?.message || "تعذر الاتصال.");
+  } finally {
+    authBusy = false; btn.disabled = false;
+  }
+});
+
+async function startEmailOtpLogin() {
+  if (authBusy) return;
+  hideMsg();
+  const client = ensureClient();
+  if (!client) { showMsg("تعذر تهيئة الاتصال."); return; }
+  const email = document.getElementById("lEmail").value.trim().toLowerCase();
+  if (!email) { showMsg("أدخل البريد الإلكتروني أولاً."); document.getElementById("lEmail").focus(); return; }
+  authBusy = true;
+  const btn = document.getElementById("btnOtpLogin");
+  btn.disabled = true;
+  try {
+    const { error } = await client.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    if (error) { showMsg(error.message); return; }
+    openOtpBox(email, "email", "تم إرسال رمز OTP المكوّن من 6 أرقام إلى بريدك الإلكتروني.");
+  } catch (err) {
+    showMsg(err?.message || "تعذر إرسال الرمز.");
+  } finally {
+    authBusy = false; btn.disabled = false;
+  }
+}
+
+document.getElementById("signupForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (authBusy) return;
+  hideMsg();
+  const client = ensureClient();
+  if (!client) { showMsg("تعذر تهيئة الاتصال."); return; }
+
+  const name = document.getElementById("sName").value.trim();
+  const email = document.getElementById("sEmail").value.trim().toLowerCase();
+  const p1 = document.getElementById("sPass").value;
+  const p2 = document.getElementById("sPass2").value;
+
+  if (!email) { showMsg("أدخل البريد الإلكتروني."); return; }
+  if (p1.length < 6) { showMsg("كلمة المرور 6 أحرف على الأقل."); return; }
+  if (p1 !== p2) { showMsg("كلمتا المرور غير متطابقتين."); return; }
+
+  authBusy = true;
+  const btn = document.getElementById("sSubmit");
+  btn.disabled = true;
+  try {
+    const { data, error: signUpErr } = await client.auth.signUp({
+      email, password: p1, options: { data: { full_name: name } }
+    });
+    if (signUpErr && signUpErr.message.toLowerCase().includes("already registered")) {
+      showMsg("هذا البريد الإلكتروني مسجل بالفعل! انتقل إلى تبويب (دخول).");
+      return;
+    }
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      showMsg("هذا البريد الإلكتروني مسجل بالفعل! انتقل إلى تبويب (دخول).");
+      return;
+    }
+    const { error: otpErr } = await client.auth.signInWithOtp({
+      email, options: { shouldCreateUser: true, data: { full_name: name } }
+    });
+    if (otpErr) { showMsg(otpErr.message); return; }
+    openOtpBox(email, "email", "تم إرسال رمز التحقق (6 أرقام) إلى بريدك الإلكتروني.");
+  } catch (err) {
+    showMsg(err?.message || "تعذر إرسال الرمز.");
+  } finally {
+    authBusy = false; btn.disabled = false;
+  }
+});
+
+async function confirmOtp() {
+  if (authBusy) return;
+  hideMsg();
+  const client = ensureClient();
+  if (!client) return;
+  const email = (otpEmail || document.getElementById("sEmail").value || document.getElementById("lEmail").value || "").trim().toLowerCase();
+  const token = document.getElementById("otpInput").value.trim();
+  if (!email) { showMsg("البريد الإلكتروني غير محدد."); return; }
+  if (!/^\d{6}$/.test(token)) { showMsg("أدخل الرمز المكوّن من 6 أرقام."); return; }
+
+  authBusy = true;
+  const btn = document.getElementById("btnConfirmOtp");
+  btn.disabled = true;
+  try {
+    const verifyType = otpFlow === "email" ? "email" : "signup";
+    let { error } = await client.auth.verifyOtp({ email, token, type: verifyType });
+    if (error && verifyType !== "email") {
+      const retry = await client.auth.verifyOtp({ email, token, type: "email" });
+      if (!retry.error) error = null;
+    }
+    if (error) { showMsg(error.message); return; }
+    await syncSession();
+    toast("تم التحقق بنجاح");
+  } catch (err) {
+    showMsg(err?.message || "تعذر التحقق.");
+  } finally {
+    authBusy = false; btn.disabled = false;
+  }
+}
+
+async function resendOtp() {
+  if (authBusy) return;
+  hideMsg();
+  const client = ensureClient();
+  if (!client) return;
+  const email = (otpEmail || document.getElementById("sEmail").value || document.getElementById("lEmail").value || "").trim().toLowerCase();
+  if (!email) { showMsg("أدخل البريد الإلكتروني أولاً."); return; }
+  authBusy = true;
+  const btn = document.getElementById("btnResendOtp");
+  btn.disabled = true;
+  try {
+    const { error } = otpFlow === "email"
+      ? await client.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
+      : await client.auth.resend({ type: "signup", email });
+    if (error) showMsg(error.message);
+    else showMsg("تم إعادة إرسال الرمز (6 أرقام).", true);
+  } catch (err) {
+    showMsg(err?.message || "تعذر إعادة الإرسال.");
+  } finally {
+    authBusy = false; btn.disabled = false;
+  }
+}
+
+async function logoutSession() {
+  if (sb) await sb.auth.signOut();
+  showAuthView();
+}
+
+function fallbackPackages() {
+  return [
+    [100,222,1],[150,333,1],[200,444,1],[300,667,1],[400,889,1],[500,1111,1],
+    [600,1333,1],[1000,2222,1],[1500,3333,1],[2000,4444,1],[2500,5556,1],[3000,6667,1],
+    [3500,7778,1],[4000,8889,1],[5000,11111,1],[6000,13333,1],[7000,15556,1],[8000,17778,1],
+    [10000,22222,1],[12000,26667,1],[14000,31111,1],[16000,35556,1],[17820,39600,1],
+    [17874,41375,2],[20000,46301,2],[25000,57870,2],[30000,69444,2],[35000,81019,2],
+    [41580,96250,2],[41634,97146,3],[50000,116667,3]
+  ].map((r, i) => ({ id: i + 1, price_egp: r[0], coins: r[1], offer_group: "offer" + r[2] }));
+}
+
+async function loadPkgData() {
+  const client = ensureClient();
+  if (!client) { allPackages = fallbackPackages(); renderPkgList(); return; }
+  try {
+    const { data, error } = await client
+      .from("packages")
+      .select("id,price_egp,coins,offer_group")
+      .eq("active", true)
+      .order("price_egp");
+    if (!error && data && data.length) {
+      allPackages = data;
+      document.getElementById("pkgSourceHint").textContent = "محدّث من قاعدة البيانات";
+    } else {
+      allPackages = fallbackPackages();
+      document.getElementById("pkgSourceHint").textContent = "الأسعار بالجنيه المصري";
+    }
+  } catch {
+    allPackages = fallbackPackages();
+  }
+  renderPkgList();
+}
+
+function filterTier(tier, el) {
+  currentTier = tier;
+  document.querySelectorAll(".pill-btn").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  renderPkgList();
+}
+
+function renderPkgList() {
+  const q = (document.getElementById("pkgSearch").value || "").trim().toLowerCase();
+  const list = allPackages.filter(p => {
+    const okTier = currentTier === "all" || p.offer_group === currentTier;
+    const okQ = !q || String(p.coins).includes(q) || String(p.price_egp).includes(q);
+    return okTier && okQ;
+  });
+  const grid = document.getElementById("pkgGrid");
+  if (!list.length) {
+    grid.innerHTML = '<div class="muted" style="grid-column:1/-1;padding:28px;text-align:center">لا توجد باقات مطابقة</div>';
+    return;
+  }
+  grid.innerHTML = list.map(p => {
+    const featured = p.offer_group === "offer3" || Number(p.price_egp) >= 20000;
+    return `
+      <div class="pkg-item ${featured ? "featured-tier" : ""}">
+        <div>
+          <div class="pkg-head">
+            <span class="pkg-code">SUPERLIVE</span>
+            <span class="pkg-tier">${esc(TIERS[p.offer_group] || "باقة")}</span>
+          </div>
+          <div class="pkg-amount">${fmt(p.coins)} <span style="font-size:13px;color:var(--muted);font-weight:700">كوين</span></div>
+        </div>
+        <div>
+          <div class="pkg-price-line">
+            <span class="muted" style="font-size:12px">السعر</span>
+            <span class="pkg-price-val">${fmt(p.price_egp)} ج.م</span>
+          </div>
+          <button type="button" class="btn ${featured ? "brass" : ""} sm" style="width:100%;padding:9px" onclick="selectPkg('${p.id}')">اختيار الباقة</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function selectPkg(id) {
+  selectedPkg = allPackages.find(p => String(p.id) === String(id));
+  if (!selectedPkg) return;
+  closeModals();
+  document.getElementById("pickedLabel").textContent = `${fmt(selectedPkg.coins)}`;
+  document.getElementById("checkoutSummary").innerHTML = `
+    <div class="list-row" style="background:var(--bg);padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong)">
+      <div><b>${fmt(selectedPkg.coins)} كوين</b> <span class="muted">· SuperLive</span></div>
+      <div style="color:var(--brass-bright);font-weight:900">${fmt(selectedPkg.price_egp)} ج.م</div>
+    </div>
+  `;
+  document.getElementById("checkoutDone").innerHTML = "";
+  document.getElementById("checkoutForm").style.display = "block";
+  document.getElementById("checkoutModal").classList.add("open");
+  toggleCheckoutPayMode();
+
+  const client = ensureClient();
+  if (client) {
+    client.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const b = await fetchUserWalletBalance(client, user.id);
+      const el = document.getElementById("checkoutWalletBal");
+      if (el) el.textContent = `${fmt(b.toFixed(2))} ج.م`;
+    });
+  }
+}
+
+function openCheckoutModal() {
+  if (!selectedPkg) {
+    switchSection("superlive");
+    toast("اختر باقة أولاً");
+    return;
+  }
+  closeModals();
+  document.getElementById("checkoutModal").classList.add("open");
+}
+
+function closeModals() {
+  document.querySelectorAll(".modal-bg").forEach(m => m.classList.remove("open"));
+}
+
+function toggleCheckoutPayMode() {
+  const mode = document.querySelector('input[name="paySource"]:checked')?.value || "transfer";
+  const isWallet = mode === "wallet";
+  document.getElementById("transferFieldsGroup").style.display = isWallet ? "none" : "block";
+  document.getElementById("cProof").required = !isWallet;
+}
+
+async function fetchUserWalletBalance(client, userId) {
+  try {
+    const { data, error } = await client.from("wallets").select("balance").eq("user_id", userId).maybeSingle();
+    if (!error && data && typeof data.balance !== "undefined") return Number(data.balance || 0);
+  } catch {}
+  return 0;
+}
+
+document.getElementById("cProof").addEventListener("change", e => {
+  const file = e.target.files[0];
+  const img = document.getElementById("cPreview");
+  if (!file || !file.type.startsWith("image/")) { img.style.display = "none"; return; }
+  img.src = URL.createObjectURL(file);
+  img.style.display = "block";
+});
+
+document.getElementById("checkoutForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const client = ensureClient();
+  if (!client || !selectedPkg) return;
+
+  const paySource = document.querySelector('input[name="paySource"]:checked')?.value || "transfer";
+  const btn = document.getElementById("cSubmit");
+  btn.disabled = true;
+
+  try {
+    const { data: { user } } = await client.auth.getUser();
+    if (!user) throw new Error("يجب تسجيل الدخول أولاً");
+
+    const customerName = document.getElementById("cName").value.trim();
+    const phone = document.getElementById("cPhone").value.trim();
+    const superliveId = document.getElementById("cLiveId").value.trim();
+    const pkgId = typeof selectedPkg.id === "number" ? selectedPkg.id : null;
+
+    if (paySource === "wallet") {
+      const priceNum = Number(selectedPkg.price_egp);
+      const coinsNum = Number(selectedPkg.coins);
+      const curBal = await fetchUserWalletBalance(client, user.id);
+      if (curBal < priceNum) {
+        throw new Error("رصيد المحفظة غير كافٍ لإتمام هذه الباقة.");
+      }
+
+      let orderRef = "";
+      const { data: rpcOrderId, error: rpcErr } = await client.rpc("pay_order_from_wallet", {
+        p_customer_name: customerName,
+        p_phone: phone,
+        p_superlive_id: superliveId,
+        p_package_id: pkgId,
+        p_package_price: priceNum,
+        p_coins: coinsNum
+      });
+
+      if (!rpcErr) {
+        orderRef = String(rpcOrderId || "");
+      } else {
+        // fallback مباشر لو الدالة لم تُحدّث بعد في SQL Editor
+        const nextBal = Number((curBal - priceNum).toFixed(2));
+        const { error: balErr } = await client
+          .from("wallets")
+          .update({ balance: nextBal, updated_at: new Date().toISOString() })
+          .eq("user_id", user.id);
+        if (balErr) throw balErr;
+
+        const { data: insertedOrder, error: ordErr } = await client
+          .from("orders")
+          .insert({
+            user_id: user.id,
+            customer_name: customerName,
+            phone,
+            superlive_id: superliveId,
+            package_id: pkgId,
+            package_price: priceNum,
+            coins: coinsNum,
+            payment_method: "رصيد المحفظة",
+            status: "paid",
+            payment_proof: "wallet_balance"
+          })
+          .select("id")
+          .single();
+        if (ordErr) throw ordErr;
+
+        await client.from("wallet_transactions").insert({
+          user_id: user.id,
+          tx_type: "order_debit",
+          amount: -priceNum,
+          description: `شراء باقة ${coinsNum} كوين (SuperLive)`
+        }).catch(() => {});
+
+        orderRef = String(insertedOrder?.id || "");
+      }
+
+      const updatedBal = await fetchUserWalletBalance(client, user.id);
+      const balEl = document.getElementById("checkoutWalletBal");
+      if (balEl) balEl.textContent = `${fmt(updatedBal.toFixed(2))} ج.م`;
+      const wBalEl = document.getElementById("walletBalanceText");
+      if (wBalEl) wBalEl.textContent = `${fmt(updatedBal.toFixed(2))} ج.م`;
+
+      document.getElementById("checkoutForm").style.display = "none";
+      const refLabel = orderRef ? `#${esc(orderRef)}` : "مؤكد";
+      document.getElementById("checkoutDone").innerHTML = `
+        <div class="alert ok">
+          تم خصم <b>${fmt(priceNum)} ج.م</b> من رصيد المحفظة وإضافة الطلب إلى قائمة طلباتك (${refLabel}).
+          <div style="margin-top:10px">
+            <button type="button" class="btn brass sm" onclick="openOrdersDrawer()">عرض قائمة طلباتي</button>
+          </div>
+        </div>
+      `;
+      toast("تم الخصم من المحفظة وإضافة الطلب");
+      return;
+    }
+
+    const file = document.getElementById("cProof").files[0];
+    const extMap = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+    if (!file || !extMap[file.type] || file.size > 5 * 1024 * 1024) {
+      toast("ارفع صورة JPG أو PNG أو WEBP بحد أقصى 5MB");
+      return;
+    }
+
+    const ref = crypto.randomUUID();
+    const storagePath = `${user.id}/${ref}.${extMap[file.type]}`;
+    const { error: upErr } = await client.storage.from(PROOFS_BUCKET).upload(storagePath, file, {
+      contentType: file.type, upsert: false
+    });
+    if (upErr) throw upErr;
+
+    const { error: insErr } = await client.from("orders").insert({
+      user_id: user.id,
+      customer_name: customerName,
+      phone,
+      superlive_id: superliveId,
+      package_id: pkgId,
+      package_price: selectedPkg.price_egp,
+      coins: selectedPkg.coins,
+      payment_method: document.querySelector('input[name="payMethod"]:checked').value,
+      status: "pending",
+      payment_proof: storagePath
+    });
+    if (insErr) throw insErr;
+
+    document.getElementById("checkoutForm").style.display = "none";
+    document.getElementById("checkoutDone").innerHTML = `<div class="alert ok">تم إرسال طلبك بنجاح — المرجع: <b>${ref.slice(0, 8).toUpperCase()}</b></div>`;
+    toast("تم إرسال الطلب");
+  } catch (err) {
+    toast(err.message || "حدث خطأ أثناء الإرسال");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function toggleDepositForm() {
+  const f = document.getElementById("walletDepositForm");
+  f.style.display = f.style.display === "none" ? "block" : "none";
+}
+
+document.getElementById("walletDepositForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const client = ensureClient();
+  const msgBox = document.getElementById("depositMsg");
+  msgBox.innerHTML = "";
+  if (!client) { msgBox.innerHTML = '<div class="alert err">تعذر الاتصال.</div>'; return; }
+
+  const amount = Number(document.getElementById("dAmount").value);
+  const file = document.getElementById("dProof").files[0];
+  const extMap = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+
+  if (!amount || amount <= 0) { msgBox.innerHTML = '<div class="alert err">أدخل مبلغاً صحيحاً.</div>'; return; }
+  if (!file || !extMap[file.type] || file.size > 5 * 1024 * 1024) {
+    msgBox.innerHTML = '<div class="alert err">ارفع صورة JPG أو PNG أو WEBP بحد أقصى 5MB.</div>';
+    return;
+  }
+
+  const btn = document.getElementById("dSubmit");
+  btn.disabled = true;
+  try {
+    const { data: { user } } = await client.auth.getUser();
+    if (!user) throw new Error("يجب تسجيل الدخول أولاً");
+
+    const ref = crypto.randomUUID();
+    const storagePath = `${user.id}/deposits/${ref}.${extMap[file.type]}`;
+    const { error: upErr } = await client.storage.from(PROOFS_BUCKET).upload(storagePath, file, {
+      contentType: file.type, upsert: false
+    });
+    if (upErr) throw upErr;
+
+    const { error: insErr } = await client.from("wallet_deposits").insert({
+      user_id: user.id,
+      user_email: user.email || "",
+      amount,
+      payment_method: document.querySelector('input[name="depPayMethod"]:checked').value,
+      proof_path: storagePath,
+      status: "pending"
+    });
+    if (insErr) throw insErr;
+
+    document.getElementById("walletDepositForm").reset();
+    document.getElementById("walletDepositForm").style.display = "none";
+    toast("تم إرسال طلب الإيداع");
+    await openWalletModal();
+  } catch (err) {
+    msgBox.innerHTML = `<div class="alert err">${esc(err.message || "تعذر إرسال الطلب.")}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function openWalletModal() {
+  const client = ensureClient();
+  closeModals();
+  renderPaymentUi();
+  document.getElementById("walletModal").classList.add("open");
+
+  const channels = getChannels();
+  document.getElementById("walletChannelsBox").innerHTML = channels.map(ch => `
+    <div class="pay-card" style="margin-bottom:8px;padding:12px 14px">
+      <div>
+        <div style="font-weight:700;font-size:13px;color:var(--ink-soft)">${esc(ch.label)}</div>
+        <div class="pay-num" style="font-size:17px">${esc(ch.number)}</div>
+      </div>
+      <button type="button" class="btn ghost-brass sm" onclick="copyNum('${esc(ch.number)}')">نسخ</button>
+    </div>
+  `).join("");
+
+  const balanceEl = document.getElementById("walletBalanceText");
+  const emailEl = document.getElementById("walletUserEmail");
+  const historyEl = document.getElementById("walletHistoryBox");
+  const countEl = document.getElementById("walletTxCount");
+  balanceEl.textContent = "0.00 ج.م";
+  historyEl.innerHTML = '<div class="muted">جاري التحميل...</div>';
+
+  if (!client) return;
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+  emailEl.textContent = user.email || "";
+
+  const bal = await fetchUserWalletBalance(client, user.id);
+  balanceEl.textContent = `${fmt(bal.toFixed(2))} ج.م`;
+
+  try {
+    const [{ data: deps }, { data: txs }] = await Promise.all([
+      client.from("wallet_deposits").select("amount,payment_method,status,admin_note,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+      client.from("wallet_transactions").select("tx_type,amount,description,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10)
+    ]);
+
+    const items = [];
+    (txs || []).forEach(t => items.push({
+      date: t.created_at,
+      title: t.description || (t.tx_type === "admin_credit" ? "إضافة رصيد" : "حركة محفظة"),
+      amount: Number(t.amount || 0),
+      status: t.tx_type === "admin_credit" ? "مضاف" : "مخصوم"
+    }));
+    (deps || []).forEach(d => items.push({
+      date: d.created_at,
+      title: `إيداع (${d.payment_method})`,
+      amount: Number(d.amount || 0),
+      status: d.status === "approved" ? "معتمد" : (d.status === "rejected" ? "مرفوض" : "قيد المراجعة"),
+      note: d.admin_note
+    }));
+
+    items.sort((a, b) => new Date(b.date) - new Date(a.date));
+    countEl.textContent = items.length ? `${items.length}` : "";
+
+    if (!items.length) {
+      historyEl.innerHTML = '<div class="muted" style="text-align:center;padding:12px">لا توجد حركات حتى الآن</div>';
+      return;
+    }
+
+    historyEl.innerHTML = items.slice(0, 8).map(it => `
+      <div class="list-row">
+        <div>
+          <b>${esc(it.title)}</b><br>
+          <span class="muted">${new Date(it.date).toLocaleString("ar-EG")}</span>
+          ${it.note ? `<div style="color:var(--brass-bright);font-size:12px;margin-top:3px">${esc(it.note)}</div>` : ""}
+        </div>
+        <div style="text-align:left">
+          <div style="font-weight:900;color:${it.amount >= 0 ? "#78e0b5" : "#f3a6a3"}">${it.amount >= 0 ? "+" : ""}${fmt(it.amount.toFixed(2))} ج.م</div>
+          <span class="st-badge st-pending" style="margin-top:4px">${esc(it.status)}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch {
+    historyEl.innerHTML = '<div class="muted">شغّل ملف SQL الخاص بالمحفظة لتفعيل السجل.</div>';
+  }
+}
+
+async function openOrdersDrawer() {
+  const client = ensureClient();
+  if (!client) return;
+  closeModals();
+  document.getElementById("myOrdersModal").classList.add("open");
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+  const { data, error } = await client
+    .from("orders")
+    .select("created_at,coins,package_price,status,admin_note,superlive_id")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  const box = document.getElementById("myOrdersList");
+  if (error) { box.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  box.innerHTML = data?.length ? data.map(o => `
+    <div class="list-row">
+      <div>
+        <b>${fmt(o.coins)} كوين</b> <span class="muted">(${fmt(o.package_price)} ج.م)</span><br>
+        <span class="muted">ID: <b style="color:var(--ink-soft)">${esc(o.superlive_id)}</b></span><br>
+        <span class="muted">${new Date(o.created_at).toLocaleString("ar-EG")}</span>
+        ${o.admin_note ? `<div style="color:var(--brass-bright);font-size:12px;margin-top:3px">ملاحظة: ${esc(o.admin_note)}</div>` : ""}
+      </div>
+      <span class="st-badge ${STATUS_CLS[o.status] || "st-pending"}">${STATUS_AR[o.status] || "غير محدد"}</span>
+    </div>
+  `).join("") : '<div class="muted" style="text-align:center;padding:20px">لا توجد طلبات</div>';
+}
+
+async function startShop() {
+  renderAppsHub();
+  renderPaymentUi();
+  await loadPkgData();
+  await syncSession();
+}
+
+window.addEventListener("load", startShop);
+</script>
+</body>
+</html>

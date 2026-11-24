@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مركز تحكم الإدارة — الدشاش استور</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0e12;--surface:#14161c;--surface-2:#1b1e27;--surface-3:#232734;
+  --ink:#f4f2ed;--ink-soft:#c8c3b8;--muted:#8b8982;
+  --brass:#d4a359;--brass-bright:#e8be7a;--brass-soft:rgba(212,163,89,.13);
+  --emerald:#28a774;--emerald-soft:rgba(40,167,116,.14);
+  --line:rgba(244,242,237,.09);--line-strong:rgba(212,163,89,.35);
+  --danger:#d9534f;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Cairo',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;transition:.16s ease}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* Admin Login Gate */
+#adminAuthScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.auth-card{
+  width:min(420px,100%);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:18px;padding:26px 22px;
+}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
+.field input{width:100%;padding:10px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.field input:focus{outline:none;border-color:var(--brass)}
+.alert-box{padding:11px 13px;border-radius:10px;font-size:12.5px;line-height:1.65;margin-top:12px;font-weight:700}
+.alert-err{background:rgba(217,83,79,.13);border:1px solid rgba(217,83,79,.35);color:#f3a6a3}
+.alert-ok{background:var(--emerald-soft);border:1px solid rgba(40,167,116,.35);color:#78e0b5}
+
+/* Layout */
+.layout{display:none;grid-template-columns:240px 1fr;min-height:100vh}
+.layout.show{display:grid}
+
+aside{background:var(--surface);border-left:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;justify-content:space-between;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:17px;padding:4px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.mono{width:32px;height:32px;border-radius:8px;background:var(--brass-soft);border:1px solid var(--line-strong);color:var(--brass-bright);display:grid;place-items:center;font-weight:900}
+.nav-menu{display:grid;gap:4px}
+.nav-item{
+  width:100%;text-align:right;border:1px solid transparent;background:transparent;
+  color:var(--muted);padding:10px 12px;border-radius:10px;font-weight:800;font-size:13.5px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.nav-item:hover{color:var(--ink);background:var(--surface-2)}
+.nav-item.active{color:var(--ink);background:var(--surface-2);border-color:var(--line-strong)}
+.cnt{font-size:11px;padding:1px 7px;border-radius:99px;background:var(--bg);color:var(--brass-bright);font-weight:800}
+
+main{padding:24px 28px 60px;max-width:1260px;width:100%}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.topbar h1{margin:0;font-size:22px;font-weight:900}
+.muted{color:var(--muted);font-size:12.5px}
+
+.btn{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:8px 14px;border-radius:9px;font-weight:800;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.btn:hover:not(:disabled){border-color:var(--line-strong);background:var(--surface-3)}
+.btn.brass{background:var(--brass);color:#11100d;border-color:var(--brass)}
+.btn.brass:hover:not(:disabled){background:var(--brass-bright)}
+.btn.ok{background:var(--emerald-soft);color:#78e0b5;border-color:rgba(40,167,116,.35)}
+.btn.bad{background:rgba(217,83,79,.12);color:#f3a6a3;border-color:rgba(217,83,79,.32)}
+.btn.sm{padding:6px 10px;font-size:12px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi .val{font-size:24px;font-weight:900;color:var(--brass-bright);margin-top:4px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.panel-hdr h3{margin:0;font-size:16.5px;font-weight:900}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+
+input,select{background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:8px 11px;border-radius:9px;font-size:13px}
+input:focus,select:focus{outline:none;border-color:var(--brass)}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:800}
+.b-pending{background:var(--brass-soft);color:var(--brass-bright)}
+.b-paid{background:rgba(56,189,248,.14);color:#7dd3fc}
+.b-shipped,.b-approved{background:var(--emerald-soft);color:#78e0b5}
+.b-rejected{background:rgba(217,83,79,.13);color:#f3a6a3}
+
+.toast{position:fixed;bottom:20px;left:20px;background:var(--surface-2);border:1px solid var(--line-strong);color:var(--ink);padding:11px 16px;border-radius:10px;font-weight:800;font-size:13px;z-index:120}
+
+@media(max-width:920px){
+  .layout.show{grid-template-columns:1fr}
+  aside{position:static;height:auto;border-left:0;border-bottom:1px solid var(--line)}
+  .nav-menu{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0e12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الدشاش استور">
+<link rel="apple-touch-icon" href="icon.svg">
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</head>
+<body>
+
+<!-- ================= ADMIN LOGIN SCREEN ================= -->
+<section id="adminAuthScreen">
+  <div class="auth-card">
+    <div class="brand" style="padding-left:0;padding-right:0"><span class="mono">د</span> دخول لوحة الإدارة</div>
+    <p class="muted" style="margin:0 0 16px">سجّل دخولك بحساب الإدارة للوصول إلى الطلبات والمحافظ والباقات.</p>
+
+    <form id="adminLoginForm">
+      <div class="field">
+        <label for="admEmail">البريد الإلكتروني</label>
+        <input id="admEmail" type="email" required autocomplete="email" dir="ltr" placeholder="admin@example.com">
+      </div>
+      <div class="field">
+        <label for="admPass">كلمة المرور</label>
+        <input id="admPass" type="password" required autocomplete="current-password" dir="ltr" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn brass" id="admLoginBtn" style="width:100%;padding:10px">دخول لوحة الإدارة</button>
+      <button type="button" class="btn" id="admOtpBtn" style="width:100%;padding:9px;margin-top:8px" onclick="sendAdminOtp()">إرسال كود OTP (6 أرقام)</button>
+    </form>
+
+    <div id="adminOtpBox" style="display:none;margin-top:12px">
+      <div class="field">
+        <label for="admOtpCode">رمز التحقق (6 أرقام)</label>
+        <input id="admOtpCode" inputmode="numeric" maxlength="6" dir="ltr" style="text-align:center;font-size:20px;font-weight:900;letter-spacing:6px" placeholder="------">
+      </div>
+      <button type="button" class="btn brass" style="width:100%;padding:10px" onclick="verifyAdminOtp()">تأكيد الكود والدخول</button>
+    </div>
+
+    <div id="admAuthMsg" style="display:none"></div>
+    <div style="margin-top:14px;text-align:center">
+      <a class="muted" href="index.html" style="text-decoration:none">← العودة إلى المتجر</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ADMIN DASHBOARD ================= -->
+<div class="layout" id="adminLayout">
+  <aside>
+    <div>
+      <div class="brand"><span class="mono">د</span> لوحة الإدارة</div>
+      <div class="muted" id="admSessionEmail" style="direction:ltr;text-align:right;margin-bottom:12px;word-break:break-all"></div>
+      <div class="nav-menu">
+        <button type="button" class="nav-item active" data-sec="overview" onclick="switchAdminSec('overview')">نظرة عامة</button>
+        <button type="button" class="nav-item" data-sec="orders" onclick="switchAdminSec('orders')">الطلبات <span class="cnt" id="cntOrders">0</span></button>
+        <button type="button" class="nav-item" data-sec="deposits" onclick="switchAdminSec('deposits')">المحافظ والإيداع <span class="cnt" id="cntDeposits">0</span></button>
+        <button type="button" class="nav-item" data-sec="packages" onclick="switchAdminSec('packages')">الباقات <span class="cnt" id="cntPkgs">0</span></button>
+        <button type="button" class="nav-item" data-sec="channels" onclick="switchAdminSec('channels')">حسابات الدفع</button>
+      </div>
+    </div>
+    <div style="display:grid;gap:8px;margin-top:20px">
+      <a class="btn brass" href="index.html">فتح المتجر</a>
+      <button type="button" class="btn sm" onclick="refreshAll()">تحديث البيانات</button>
+      <button type="button" class="btn bad sm" onclick="adminLogout()">تسجيل خروج</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h1 id="secTitle">نظرة عامة</h1>
+        <div class="muted">إدارة الطلبات، أرصدة المحافظ، الباقات، وحسابات التحويل</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn sm" onclick="refreshAll()">تحديث الآن</button>
+      </div>
+    </div>
+
+    <!-- SECTION 1: OVERVIEW -->
+    <div id="sec-overview">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="muted">إجمالي الطلبات</div><div class="val" id="kpiOrders">0</div></div>
+        <div class="kpi"><div class="muted">طلبات قيد المراجعة</div><div class="val" id="kpiPending">0</div></div>
+        <div class="kpi"><div class="muted">إيداعات بانتظار الرصيد</div><div class="val" id="kpiDeposits">0</div></div>
+        <div class="kpi"><div class="muted">إجمالي مبالغ الطلبات</div><div class="val" id="kpiRevenue">0 ج.م</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><h3>إدارة رصيد مستخدم مباشرة (إضافة / سحب)</h3></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <input id="quickUid" dir="ltr" placeholder="User UUID" style="flex:2;min-width:240px">
+          <input id="quickAmt" type="number" min="1" step="0.01" placeholder="المبلغ (ج.م)" style="width:140px">
+          <input id="quickNote" placeholder="سبب الإضافة أو السحب / ملاحظة" style="flex:1;min-width:170px">
+          <button type="button" class="btn brass" onclick="quickAddCredit()">إضافة الرصيد</button>
+          <button type="button" class="btn bad" onclick="quickWithdrawCredit()">سحب الرصيد</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: ORDERS -->
+    <div id="sec-orders" style="display:none">
+      <div class="panel">
+        <div class="panel-hdr">
+          <h3>طلبات الشحن</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="orderStatusFilter" onchange="renderOrders()">
+              <option value="all">كل الحالات</option>
+              <option value="pending">قيد المراجعة</option>
+              <option value="paid">مؤكد</option>
+              <option value="shipped">تم الشحن</option>
+              <option value="rejected">مرفوض</option>
+            </select>
+            <input id="orderSearch" placeholder="بحث بالـ ID أو الاسم أو الهاتف..." oninput="renderOrders()">
+          </div>
+        </div>
+        <div id="ordersBox">جاري التحميل...</div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: DEPOSITS & WALLETS -->
+    <div id="sec-deposits" style="display:none">
+      <div class="panel">
+        <div class="panel-hdr"><h3>تزويد أو سحب رصيد مستخدم</h3></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <input id="depManualUid" dir="ltr" placeholder="User UUID" style="flex:2;min-width:240px">
+          <input id="depManualAmt" type="number" min="1" step="0.01" placeholder="المبلغ (ج.م)" style="width:140px">
+          <input id="depManualNote" placeholder="ملاحظة" style="flex:1;min-width:160px">
+          <button type="button" class="btn brass" onclick="manualCreditFromDepTab()">تزويد الرصيد</button>
+          <button type="button" class="btn bad" onclick="manualWithdrawFromDepTab()">سحب الرصيد</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><h3>أرصدة محافظ العملاء</h3></div>
+        <div id="walletsBox">جاري التحميل...</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><h3>طلبات إيداع المحافظ</h3></div>
+        <div id="depositsBox">جاري التحميل...</div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: PACKAGES -->
+    <div id="sec-packages" style="display:none">
+      <div class="panel">
+        <div class="panel-hdr"><h3>إضافة باقة جديدة</h3></div>
+        <form id="addPkgForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <input id="newPkgCoins" type="number" min="1" step="1" required placeholder="عدد الكوينز" style="width:150px">
+          <input id="newPkgPrice" type="number" min="1" step="0.01" required placeholder="السعر (ج.م)" style="width:150px">
+          <select id="newPkgTier">
+            <option value="offer1">العرض الأول</option>
+            <option value="offer2">العرض الثاني</option>
+            <option value="offer3">العرض الثالث</option>
+          </select>
+          <button type="submit" class="btn brass">إضافة الباقة</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><h3>الباقات الحالية</h3></div>
+        <div id="packagesBox">جاري التحميل...</div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: PAYMENT CHANNELS -->
+    <div id="sec-channels" style="display:none">
+      <div class="panel">
+        <div class="panel-hdr"><h3>حسابات التحويل في المتجر</h3></div>
+        <div id="channelsEditorBox"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="button" class="btn brass" onclick="saveChannels()">حفظ الحسابات</button>
+          <button type="button" class="btn" onclick="resetChannels()">استعادة الافتراضي</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://etdegfytfcfwuorexctj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_NP_1OLXEN0_f398DthKnGA_725B_IMf";
+const PROOFS_BUCKET = "payment-proofs";
+// ضع بريدك أو بريد الأدمن هنا داخل المصفوفة (مثال: ["ayman@example.com"])
+const ADMIN_EMAILS = [
+  "admin@eldashash.com"
+];
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const DEFAULT_CHANNELS = [
+  { label: "إنستاباي (InstaPay)", number: "01119409694" },
+  { label: "فودافون كاش (Vodafone Cash)", number: "01011496149" }
+];
+
+let ordersData = [];
+let depositsData = [];
+let packagesData = [];
+
+const fmt = n => Number(n || 0).toLocaleString("en-US");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+
+function toast(msg) {
+  const d = document.createElement("div");
+  d.className = "toast";
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2700);
+}
+
+function showAdmMsg(msg, ok = false) {
+  const el = document.getElementById("admAuthMsg");
+  el.style.display = "block";
+  el.className = ok ? "alert-box alert-ok" : "alert-box alert-err";
+  el.textContent = msg;
+}
+
+async function isAllowedAdmin(user) {
+  if (!user || !user.email) return false;
+  const emailLower = String(user.email).trim().toLowerCase();
+  if (user.app_metadata && user.app_metadata.role === "admin") return true;
+
+  const list = ADMIN_EMAILS.map(x => String(x || "").trim().toLowerCase()).filter(Boolean);
+  if (list.includes(emailLower)) return true;
+
+  try {
+    const { data } = await sb.from("admin_users").select("email").ilike("email", emailLower).maybeSingle();
+    if (data && data.email) return true;
+  } catch {}
+
+  return false;
+}
+
+async function checkAdminSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user && await isAllowedAdmin(session.user)) {
+    document.getElementById("adminAuthScreen").style.display = "none";
+    document.getElementById("adminLayout").classList.add("show");
+    document.getElementById("admSessionEmail").textContent = session.user.email || "";
+    await refreshAll();
+  } else {
+    document.getElementById("adminAuthScreen").style.display = "flex";
+    document.getElementById("adminLayout").classList.remove("show");
+  }
+}
+
+document.getElementById("adminLoginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  document.getElementById("admAuthMsg").style.display = "none";
+  const btn = document.getElementById("admLoginBtn");
+  btn.disabled = true;
+  try {
+    const email = document.getElementById("admEmail").value.trim().toLowerCase();
+    const password = document.getElementById("admPass").value;
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { showAdmMsg(error.message); return; }
+    if (!(await isAllowedAdmin(data.user))) {
+      await sb.auth.signOut();
+      showAdmMsg("هذا البريد غير مصرّح له بدخول لوحة الإدارة.");
+      return;
+    }
+    await checkAdminSession();
+  } catch (err) {
+    showAdmMsg(err?.message || "تعذر تسجيل الدخول.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function sendAdminOtp() {
+  document.getElementById("admAuthMsg").style.display = "none";
+  const email = document.getElementById("admEmail").value.trim().toLowerCase();
+  if (!email) { showAdmMsg("اكتب البريد الإلكتروني أولاً."); return; }
+  if (!(await isAllowedAdmin({ email }))) { showAdmMsg("هذا البريد غير مصرّح له بدخول لوحة الإدارة."); return; }
+  const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+  if (error) { showAdmMsg(error.message); return; }
+  document.getElementById("adminOtpBox").style.display = "block";
+  showAdmMsg("تم إرسال كود OTP (6 أرقام) إلى بريدك الإلكتروني.", true);
+}
+
+async function verifyAdminOtp() {
+  const email = document.getElementById("admEmail").value.trim().toLowerCase();
+  const token = document.getElementById("admOtpCode").value.trim();
+  if (!email || !/^\d{6}$/.test(token)) { showAdmMsg("أدخل الكود المكوّن من 6 أرقام."); return; }
+  const { data, error } = await sb.auth.verifyOtp({ email, token, type: "email" });
+  if (error) { showAdmMsg(error.message); return; }
+  if (!(await isAllowedAdmin(data.user))) {
+    await sb.auth.signOut();
+    showAdmMsg("هذا البريد غير مصرّح له بدخول لوحة الإدارة.");
+    return;
+  }
+  await checkAdminSession();
+}
+
+async function adminLogout() {
+  await sb.auth.signOut();
+  await checkAdminSession();
+}
+
+function switchAdminSec(sec) {
+  const titles = {
+    overview: "نظرة عامة",
+    orders: "الطلبات",
+    deposits: "المحافظ والإيداع",
+    packages: "الباقات",
+    channels: "حسابات الدفع"
+  };
+  document.getElementById("secTitle").textContent = titles[sec] || "لوحة الإدارة";
+  ["overview", "orders", "deposits", "packages", "channels"].forEach(k => {
+    const el = document.getElementById("sec-" + k);
+    if (el) el.style.display = (k === sec) ? "block" : "none";
+  });
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.sec === sec));
+}
+
+async function viewProof(path) {
+  if (!path || path === "wallet_balance") { toast("مدفوع من رصيد المحفظة"); return; }
+  const { data, error } = await sb.storage.from(PROOFS_BUCKET).createSignedUrl(path, 120);
+  if (error || !data?.signedUrl) { toast("تعذر فتح الإيصال"); return; }
+  window.open(data.signedUrl, "_blank");
+}
+
+async function addBalance(uid, amt, note, depId = null) {
+  if (!uid || !amt || Number(amt) <= 0) { toast("أدخل User ID ومبلغاً صحيحاً"); return; }
+  const { data: newBal, error } = await sb.rpc("admin_add_wallet_balance", {
+    target_user_id: uid.trim(),
+    add_amount: Number(amt),
+    note_text: note || "إضافة رصيد من الإدارة",
+    deposit_id: depId
+  });
+  if (error) { toast("خطأ: " + error.message); return; }
+  toast(`تمت الإضافة — الرصيد الحالي: ${Number(newBal).toFixed(2)} ج.م`);
+  await loadDeposits();
+}
+
+async function quickAddCredit() {
+  await addBalance(
+    document.getElementById("quickUid").value,
+    document.getElementById("quickAmt").value,
+    document.getElementById("quickNote").value
+  );
+}
+
+async function manualCreditFromDepTab() {
+  await addBalance(
+    document.getElementById("depManualUid").value,
+    document.getElementById("depManualAmt").value,
+    document.getElementById("depManualNote").value
+  );
+}
+
+async function updateOrderStatus(orderId, status) {
+  const noteEl = document.getElementById("note_" + orderId);
+  const noteVal = noteEl ? noteEl.value.trim() : null;
+  const payload = { status };
+  if (noteVal) payload.admin_note = noteVal;
+  const { error } = await sb.from("orders").update(payload).eq("id", orderId);
+  if (error) { toast("تعذر التحديث: " + error.message); return; }
+  toast("تم تحديث حالة الطلب");
+  await loadOrders();
+}
+
+function renderOrders() {
+  const st = document.getElementById("orderStatusFilter").value;
+  const q = (document.getElementById("orderSearch").value || "").trim().toLowerCase();
+  const box = document.getElementById("ordersBox");
+
+  const list = ordersData.filter(o => {
+    const okSt = st === "all" || o.status === st;
+    const okQ = !q ||
+      String(o.superlive_id || "").toLowerCase().includes(q) ||
+      String(o.customer_name || "").toLowerCase().includes(q) ||
+      String(o.phone || "").toLowerCase().includes(q) ||
+      String(o.id || "").toLowerCase().includes(q);
+    return okSt && okQ;
+  });
+
+  if (!list.length) { box.innerHTML = '<div class="muted">لا توجد طلبات مطابقة.</div>'; return; }
+
+  box.innerHTML = list.map(o => `
+    <div class="row">
+      <div>
+        <b>${fmt(o.coins)} كوين</b> — <span style="color:var(--brass-bright);font-weight:800">${fmt(o.package_price)} ج.م</span>
+        <span class="badge b-${o.status || "pending"}" style="margin-right:6px">${esc(o.status || "pending")}</span><br>
+        <span class="muted">العميل: ${esc(o.customer_name || "-")} · هاتف: <span dir="ltr">${esc(o.phone || "-")}</span> · ID: <b>${esc(o.superlive_id || "-")}</b></span><br>
+        <span class="muted">الدفع: ${esc(o.payment_method || "-")} · ${o.created_at ? new Date(o.created_at).toLocaleString("ar-EG") : ""}</span>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+        <button type="button" class="btn sm" onclick="viewProof('${esc(o.payment_proof || "")}')">الإيصال</button>
+        <input id="note_${esc(o.id)}" value="${esc(o.admin_note || "")}" placeholder="ملاحظة" style="width:130px;padding:6px 9px">
+        <button type="button" class="btn ok sm" onclick="updateOrderStatus('${esc(o.id)}','shipped')">تم الشحن</button>
+        <button type="button" class="btn bad sm" onclick="updateOrderStatus('${esc(o.id)}','rejected')">رفض</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function loadOrders() {
+  const box = document.getElementById("ordersBox");
+  let res = await sb.from("orders").select("*").order("created_at", { ascending: false }).limit(150);
+  if (res.error) {
+    res = await sb.from("orders").select("*").limit(150);
+  }
+  if (res.error) {
+    box.innerHTML = `<div class="muted">تعذر جلب الطلبات: ${esc(res.error.message)}</div>`;
+    return;
+  }
+  ordersData = res.data || [];
+  document.getElementById("cntOrders").textContent = ordersData.length;
+  document.getElementById("kpiOrders").textContent = ordersData.length;
+  document.getElementById("kpiPending").textContent = ordersData.filter(x => x.status === "pending").length;
+  const sum = ordersData.filter(x => x.status !== "rejected").reduce((a, b) => a + Number(b.package_price || 0), 0);
+  document.getElementById("kpiRevenue").textContent = `${fmt(sum)} ج.م`;
+  renderOrders();
+}
+
+async function rejectDeposit(depId) {
+  const { error } = await sb.from("wallet_deposits").update({ status: "rejected", reviewed_at: new Date().toISOString() }).eq("id", depId);
+  if (error) { toast(error.message); return; }
+  toast("تم رفض طلب الإيداع");
+  await loadDeposits();
+}
+
+async function loadDeposits() {
+  const box = document.getElementById("depositsBox");
+  const { data, error } = await sb
+    .from("wallet_deposits")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(80);
+
+  if (error) { box.innerHTML = `<div class="muted">${esc(error.message)}</div>`; return; }
+  depositsData = data || [];
+  const pendingCount = depositsData.filter(d => d.status === "pending").length;
+  document.getElementById("cntDeposits").textContent = pendingCount;
+  document.getElementById("kpiDeposits").textContent = pendingCount;
+
+  if (!depositsData.length) { box.innerHTML = '<div class="muted">لا توجد طلبات إيداع.</div>'; return; }
+
+  box.innerHTML = depositsData.map(d => `
+    <div class="row">
+      <div>
+        <b>${Number(d.amount).toFixed(2)} ج.م</b> — <span class="muted">${esc(d.payment_method)}</span>
+        <span class="badge b-${d.status}" style="margin-right:6px">${esc(d.status)}</span><br>
+        <span class="muted">${esc(d.user_email || "-")} · UID: <span dir="ltr">${esc(d.user_id)}</span></span><br>
+        <span class="muted">${d.created_at ? new Date(d.created_at).toLocaleString("ar-EG") : ""}</span>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+        <button type="button" class="btn sm" onclick="viewProof('${esc(d.proof_path || "")}')">الإيصال</button>
+        <input type="number" step="0.01" id="amt_${esc(d.id)}" value="${Number(d.amount)}" style="width:98px;padding:6px 8px">
+        <button type="button" class="btn brass sm" onclick="addBalance('${esc(d.user_id)}', document.getElementById('amt_${esc(d.id)}').value, 'اعتماد إيداع', '${esc(d.id)}')">تزويد رصيد</button>
+        <button type="button" class="btn bad sm" onclick="withdrawBalance('${esc(d.user_id)}', document.getElementById('amt_${esc(d.id)}').value, 'سحب رصيد من الإدارة')">سحب رصيد</button>
+        <button type="button" class="btn sm" onclick="rejectDeposit('${esc(d.id)}')">رفض</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function loadPackages() {
+  const box = document.getElementById("packagesBox");
+  const { data, error } = await sb.from("packages").select("*").order("price_egp");
+  if (error) { box.innerHTML = `<div class="muted">${esc(error.message)}</div>`; return; }
+  packagesData = data || [];
+  document.getElementById("cntPkgs").textContent = packagesData.length;
+  if (!packagesData.length) { box.innerHTML = '<div class="muted">لا توجد باقات في الجدول بعد.</div>'; return; }
+
+  box.innerHTML = packagesData.map(p => `
+    <div class="row">
+      <div>
+        <b>${fmt(p.coins)} كوين</b> — <span style="color:var(--brass-bright);font-weight:800">${fmt(p.price_egp)} ج.م</span>
+        <span class="muted">(${esc(p.offer_group)} · ${p.active ? "نشطة" : "متوقفة"})</span>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button type="button" class="btn sm" onclick="togglePkg(${p.id}, ${!p.active})">${p.active ? "إيقاف" : "تفعيل"}</button>
+        <button type="button" class="btn bad sm" onclick="deletePkg(${p.id})">حذف</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("addPkgForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const coins = Number(document.getElementById("newPkgCoins").value);
+  const price_egp = Number(document.getElementById("newPkgPrice").value);
+  const offer_group = document.getElementById("newPkgTier").value;
+  const { error } = await sb.from("packages").insert({ coins, price_egp, offer_group, active: true });
+  if (error) { toast(error.message); return; }
+  e.target.reset();
+  toast("تمت إضافة الباقة");
+  await loadPackages();
+});
+
+async function togglePkg(id, active) {
+  const { error } = await sb.from("packages").update({ active }).eq("id", id);
+  if (error) { toast(error.message); return; }
+  await loadPackages();
+}
+
+async function deletePkg(id) {
+  const { error } = await sb.from("packages").delete().eq("id", id);
+  if (error) { toast(error.message); return; }
+  toast("تم حذف الباقة");
+  await loadPackages();
+}
+
+function renderChannelsEditor() {
+  let chs = DEFAULT_CHANNELS;
+  try {
+    const saved = JSON.parse(localStorage.getItem("eldashash_channels_v1") || "null");
+    if (Array.isArray(saved) && saved.length) chs = saved;
+  } catch {}
+
+  document.getElementById("channelsEditorBox").innerHTML = chs.map((c, i) => `
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+      <input id="chLabel_${i}" value="${esc(c.label)}" placeholder="اسم الوسيلة" style="flex:1;min-width:190px">
+      <input id="chNum_${i}" dir="ltr" value="${esc(c.number)}" placeholder="الرقم" style="flex:1;min-width:190px">
+    </div>
+  `).join("");
+}
+
+function saveChannels() {
+  const chs = [0, 1].map(i => ({
+    label: (document.getElementById("chLabel_" + i)?.value || "").trim(),
+    number: (document.getElementById("chNum_" + i)?.value || "").trim()
+  })).filter(x => x.label && x.number);
+  if (!chs.length) { toast("أدخل بيانات صحيحة"); return; }
+  localStorage.setItem("eldashash_channels_v1", JSON.stringify(chs));
+  toast("تم حفظ حسابات التحويل");
+}
+
+function resetChannels() {
+  localStorage.removeItem("eldashash_channels_v1");
+  renderChannelsEditor();
+  toast("تمت الاستعادة");
+}
+
+
+async function withdrawBalance(uid, amt, note) {
+  if (!uid || !amt || Number(amt) <= 0) { toast("أدخل User ID ومبلغاً صحيحاً"); return; }
+  const { data: newBal, error } = await sb.rpc("admin_withdraw_wallet_balance", {
+    target_user_id: uid.trim(),
+    withdraw_amount: Number(amt),
+    note_text: note || "سحب رصيد بواسطة الإدارة"
+  });
+  if (error) { toast("خطأ: " + error.message); return; }
+  toast(`تم سحب ${Number(amt).toFixed(2)} ج.م — الرصيد المتبقي: ${Number(newBal).toFixed(2)} ج.م`);
+  await Promise.all([loadDeposits(), loadWallets()]);
+}
+
+async function quickWithdrawCredit() {
+  await withdrawBalance(
+    document.getElementById("quickUid").value,
+    document.getElementById("quickAmt").value,
+    document.getElementById("quickNote").value || "سحب رصيد من الإدارة"
+  );
+}
+
+async function manualWithdrawFromDepTab() {
+  await withdrawBalance(
+    document.getElementById("depManualUid").value,
+    document.getElementById("depManualAmt").value,
+    document.getElementById("depManualNote").value || "سحب رصيد من الإدارة"
+  );
+}
+
+async function loadWallets() {
+  const box = document.getElementById("walletsBox");
+  if (!box) return;
+  const { data, error } = await sb.from("wallets").select("user_id,user_email,balance,updated_at").order("balance", { ascending: false }).limit(60);
+  if (error) { box.innerHTML = `<div class="muted">${esc(error.message)}</div>`; return; }
+  if (!data || !data.length) { box.innerHTML = '<div class="muted">لا توجد محافظ مسجلة بعد.</div>'; return; }
+
+  box.innerHTML = data.map(w => `
+    <div class="row">
+      <div>
+        <b>${esc(w.user_email || "مستخدم")}</b> — <span style="color:var(--brass-bright);font-weight:900">${Number(w.balance || 0).toFixed(2)} ج.م</span><br>
+        <span class="muted">UID: <span dir="ltr">${esc(w.user_id)}</span></span>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+        <input type="number" min="1" step="0.01" id="wamt_${esc(w.user_id)}" placeholder="مبلغ" style="width:95px;padding:6px 8px">
+        <button type="button" class="btn brass sm" onclick="addBalance('${esc(w.user_id)}', document.getElementById('wamt_${esc(w.user_id)}').value, 'إضافة رصيد من لوحة المحافظ', null)">إضافة</button>
+        <button type="button" class="btn bad sm" onclick="withdrawBalance('${esc(w.user_id)}', document.getElementById('wamt_${esc(w.user_id)}').value, 'سحب رصيد من لوحة المحافظ')">سحب رصيد</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function refreshAll() {
+  renderChannelsEditor();
+  await Promise.all([loadOrders(), loadDeposits(), loadWallets(), loadPackages()]);
+}
+
+window.addEventListener("load", checkAdminSession);
+</script>
+</body>
+</html>
